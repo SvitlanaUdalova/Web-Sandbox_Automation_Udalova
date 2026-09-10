@@ -1,0 +1,23 @@
+{
+  "name": "web-sandbox_automation_udalova",
+  "version": "1.0.0",
+  "description": "Web-Sandbox Automation API\r Markdown",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SvitlanaUdalova/Web-Sandbox_Automation_Udalova.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SvitlanaUdalova/Web-Sandbox_Automation_Udalova/issues"
+  },
+  "homepage": "https://github.com/SvitlanaUdalova/Web-Sandbox_Automation_Udalova#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.1"
+  }
+}
