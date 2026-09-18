@@ -1,0 +1,1 @@
+export const PAGEURL = 'https://demoqa.com/login'; 
