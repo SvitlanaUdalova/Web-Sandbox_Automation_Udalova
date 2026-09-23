@@ -15,6 +15,18 @@ export class LoginPage {
     await expect(this.page).toHaveURL(expectedURL);
   }
 
+  async verifyLoggedIn() {
+    await expect(this.page).toHaveURL(/profile/);
+    const logOutButton = this.page.getByRole('button', { name: 'Logout' });
+    await expect(logOutButton).toBeVisible();
+  }
+
+  async verifyLoginFailed(expectedURL: string, expectedErrorMessage: string) {
+    await this.checkURL(expectedURL);
+    const errorMessage = this.page.getByText(expectedErrorMessage);
+    await expect(errorMessage).toBeVisible();
+  }
+
   async verifyOpened() {
     const header = this.page.getByRole('heading', { name: 'Login', exact: true });
     const headerText = this.page.getByRole('heading', { name: 'Login in Book Store' });
