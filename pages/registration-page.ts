@@ -3,7 +3,7 @@ import { User } from '../models/user-credentials';
 
 // Page object for the "New User" registration form on the login page
 export class RegistrationPage {
-    constructor(private page: Page) { }
+    constructor(private page: Page) {}
 
     private get newUserButton() {
         return this.page.getByRole('button', { name: 'New User' });
