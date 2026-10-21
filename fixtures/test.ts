@@ -4,6 +4,7 @@ import { RegistrationPage } from '../pages/registration-page';
 import { ProfilePage } from '../pages/profile-page';
 import { LeftMenu } from '../pages/left-menu';
 import { WebTablesPage } from '../pages/web-tables-page';
+import { BooksPage } from '../pages/books-page';
 
 type PageFixtures = {
     loginPage: LoginPage;
@@ -11,9 +12,12 @@ type PageFixtures = {
     profilePage: ProfilePage;
     leftMenu: LeftMenu;
     webTablesPage: WebTablesPage;
+    booksPage: BooksPage;
 };
 
 export const test = base.extend<PageFixtures>({
+    // Fixtures construct page objects and apply their initial route; test-specific actions
+    // and assertions remain in the specs.
     loginPage: async ({ page }, use) => {
         await page.goto(LoginPage.URL);
         await use(new LoginPage(page));
@@ -33,6 +37,10 @@ export const test = base.extend<PageFixtures>({
         await page.goto(WebTablesPage.URL);
         await use(new WebTablesPage(page));
     },
+    booksPage: async ({ page }, use) => {
+        await page.goto('/books');
+        await use(new (await import('../pages/books-page')).BooksPage(page));
+    }
 });
 
 export { expect };
