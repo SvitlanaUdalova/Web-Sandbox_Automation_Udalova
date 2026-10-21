@@ -8,3 +8,5 @@ export const worker: Worker = new Worker(
     'Engineering',
     'john.doe@example.com',
 );
+
+export const updatedWorkerEmail = 'UpdatedEmail@example.com';

@@ -1,5 +1,5 @@
 import { test } from '../fixtures/test';
-import { worker } from '../test-data/workers';
+import { updatedWorkerEmail, worker } from '../test-data/workers';
 
 test.describe('Web Tables Tests', () => {
     test('should display the web tables correctly', async ({ webTablesPage }) => {
@@ -22,7 +22,7 @@ test.describe('Web Tables Tests', () => {
 
     test('should update an existing worker in the web table', async ({ webTablesPage }) => {
         const workerToEdit = await webTablesPage.getWorkerByIndex(0);
-        const updatedWorker = { ...workerToEdit, email: 'UpdatedEmail@example.com' };
+        const updatedWorker = { ...workerToEdit, email: updatedWorkerEmail };
 
         await webTablesPage.verifyWorkerExists(workerToEdit);
         await webTablesPage.editWorker(workerToEdit, updatedWorker);
