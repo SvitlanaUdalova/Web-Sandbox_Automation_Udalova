@@ -2,6 +2,7 @@ import { expect, Page } from "@playwright/test";
 import { Book } from "../models/book";
 
 export class BooksPage {
+    static readonly URL = '/books';
     constructor(private page: Page) {}
 
     async navigateToBooks() {

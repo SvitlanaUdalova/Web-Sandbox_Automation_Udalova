@@ -38,8 +38,8 @@ export const test = base.extend<PageFixtures>({
         await use(new WebTablesPage(page));
     },
     booksPage: async ({ page }, use) => {
-        await page.goto('/books');
-        await use(new (await import('../pages/books-page')).BooksPage(page));
+        await page.goto(BooksPage.URL);
+        await use(new BooksPage(page));
     }
 });
 
