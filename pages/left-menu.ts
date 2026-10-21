@@ -13,7 +13,7 @@ export class LeftMenu {
         await expect(webTablesOption).not.toBeVisible();
     }
 
-    async verifyElementsDropdownOpened() {
+    async openElementsDropdown() {
         await this.page.getByText('Elements').click();
     }
 

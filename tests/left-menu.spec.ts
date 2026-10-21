@@ -10,7 +10,7 @@ test.describe('Left Menu Tests', () => {
         await loginPage.login(user.credentials.username, user.credentials.password);
 
         await leftMenu.verifyWebTablesOptionNotDisplayed();
-        await leftMenu.verifyElementsDropdownOpened();
+        await leftMenu.openElementsDropdown();
         await leftMenu.verifyWebTablesOptionDisplayed();
         await leftMenu.verifyWebTables();
     });
