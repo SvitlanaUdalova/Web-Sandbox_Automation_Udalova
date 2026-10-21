@@ -34,16 +34,27 @@ export class WebTablesPage {
     }
 
     async getWorkerByIndex(index: number): Promise<Worker> {
-        const row = this.page.locator('table tbody tr').nth(index);
+        if (!Number.isInteger(index) || index < 0) {
+            throw new RangeError('Worker row index must be a non-negative integer.');
+        }
 
-        return {
-            firstName: (await row.locator('td').nth(0).textContent()) ?? '',
-            lastName: (await row.locator('td').nth(1).textContent()) ?? '',
-            age: parseInt((await row.locator('td').nth(2).textContent()) || '0', 10),
-            email: (await row.locator('td').nth(3).textContent()) ?? '',
-            salary: parseFloat((await row.locator('td').nth(4).textContent()) || '0'),
-            department: (await row.locator('td').nth(5).textContent()) ?? '',
-        };
+        const row = this.page.locator('table tbody tr').nth(index);
+        await expect(row).toBeVisible();
+
+        const cells = row.locator('td');
+        await expect(cells).toHaveCount(7);
+
+        const firstName = await this.getRequiredCellText(cells, 0, 'first name');
+        const lastName = await this.getRequiredCellText(cells, 1, 'last name');
+        const age = this.parseWorkerNumber(await this.getRequiredCellText(cells, 2, 'age'), 'age');
+        const email = await this.getRequiredCellText(cells, 3, 'email');
+        const salary = this.parseWorkerNumber(
+            await this.getRequiredCellText(cells, 4, 'salary'),
+            'salary',
+        );
+        const department = await this.getRequiredCellText(cells, 5, 'department');
+
+        return new Worker(firstName, lastName, age, salary, department, email);
     }
 
     async deleteWorker(worker: Worker) {
@@ -66,6 +77,24 @@ export class WebTablesPage {
 
     private async getWorkerRow(worker: Worker) {
         return this.page.locator('table tbody tr', { hasText: worker.email });
+    }
+
+    private async getRequiredCellText(cells: Locator, index: number, field: string) {
+        const value = (await cells.nth(index).innerText()).trim();
+        if (!value) {
+            throw new Error(`Expected worker ${field} to have a value in the table.`);
+        }
+
+        return value;
+    }
+
+    private parseWorkerNumber(value: string, field: string) {
+        const number = Number(value);
+        if (!Number.isFinite(number)) {
+            throw new Error(`Expected worker ${field} to be a valid number; received "${value}".`);
+        }
+
+        return number;
     }
 
     private async fillWorkerData(worker: Worker) {
