@@ -22,10 +22,11 @@ export default defineConfig({
     reporter: 'html',
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
-        baseURL: 'https://demoqa.com',
+        baseURL: process.env.BASE_URL || 'https://demoqa.com',
 
-        /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-        trace: 'on',
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
         headless: false,
     },
 

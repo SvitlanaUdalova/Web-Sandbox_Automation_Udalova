@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Test for opening the DemoQA home page
-test('should open DemoQA home page', async ({ page }) => {
+test('should open DemoQA home page', { tag: ['@smoke', '@regression'] }, async ({ page }) => {
     await page.goto('/');
 
     await expect(page).toHaveTitle(/demosite/);
