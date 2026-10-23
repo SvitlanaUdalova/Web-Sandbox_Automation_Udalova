@@ -3,6 +3,47 @@ name: Playwright Tests
 on:
     pull_request:
         branches: [main, master, development]
+    schedule:
+        # 23:00 fixed EST (UTC-5), on the following UTC day.
+        - cron: '0 4 * * *'
+    workflow_dispatch:
+        inputs:
+            base_url:
+                description: Target environment URL (use credentials for this environment)
+                type: string
+                default: https://demoqa.com
+                required: true
+            git_ref:
+                description: Branch, tag, or SHA to test (blank uses the selected workflow branch)
+                type: string
+                required: false
+            batch:
+                description: Test batch
+                type: choice
+                default: all
+                options:
+                    - all
+                    - login
+                    - profile
+                    - web-tables
+                    - left-menu
+                    - start-page
+            tags:
+                description: Test tag filter (combined with the selected batch)
+                type: choice
+                default: regression
+                options:
+                    - all
+                    - smoke
+                    - regression
+
+permissions:
+    contents: read
+
+# Runs use the same account, so do not let separate workflows mutate it concurrently.
+concurrency:
+    group: demoqa-shared-account
+    cancel-in-progress: false
 
 jobs:
     test:
@@ -10,11 +51,14 @@ jobs:
         runs-on: ubuntu-latest
         env:
             CI: true
+            BASE_URL: ${{ inputs.base_url || 'https://demoqa.com' }}
             DEMOQA_USERNAME: ${{ secrets.DEMOQA_USERNAME }}
             DEMOQA_PASSWORD: ${{ secrets.DEMOQA_PASSWORD }}
 
         steps:
             - uses: actions/checkout@v4
+              with:
+                  ref: ${{ inputs.git_ref || github.ref }}
 
             - uses: actions/setup-node@v4
               with:
@@ -28,7 +72,25 @@ jobs:
               run: npx playwright install --with-deps chromium
 
             - name: Run Playwright tests
-              run: xvfb-run -a npx playwright test
+              shell: bash
+              env:
+                  TEST_BATCH: ${{ inputs.batch || 'all' }}
+                  TEST_TAGS: ${{ inputs.tags || 'regression' }}
+              run: |
+                  args=()
+                  case "$TEST_BATCH" in
+                    all) ;;
+                    login|profile|web-tables|left-menu|start-page)
+                      args+=("tests/${TEST_BATCH}.spec.ts")
+                      ;;
+                    *) echo "::error::Unknown test batch: $TEST_BATCH"; exit 1 ;;
+                  esac
+                  case "$TEST_TAGS" in
+                    all) ;;
+                    smoke|regression) args+=(--grep "@${TEST_TAGS}") ;;
+                    *) echo "::error::Unknown test tag: $TEST_TAGS"; exit 1 ;;
+                  esac
+                  xvfb-run -a npx playwright test "${args[@]}"
 
             - name: Upload Playwright report
               uses: actions/upload-artifact@v4
@@ -36,5 +98,14 @@ jobs:
               with:
                   name: playwright-report
                   path: playwright-report/
+                  if-no-files-found: ignore
+                  retention-days: 30
+
+            - name: Upload failure diagnostics
+              uses: actions/upload-artifact@v4
+              if: ${{ !cancelled() }}
+              with:
+                  name: playwright-test-results
+                  path: test-results/
                   if-no-files-found: ignore
                   retention-days: 30

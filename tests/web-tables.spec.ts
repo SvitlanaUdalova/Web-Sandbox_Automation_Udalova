@@ -1,10 +1,14 @@
 import { test } from '../fixtures/test';
 import { updatedWorkerEmail, worker } from '../test-data/workers';
 
-test.describe('Web Tables Tests', () => {
-    test('should display the web tables correctly', async ({ webTablesPage }) => {
-        await webTablesPage.verifyWebTablesDetails();
-    });
+test.describe('Web Tables Tests', { tag: '@regression' }, () => {
+    test(
+        'should display the web tables correctly',
+        { tag: '@smoke' },
+        async ({ webTablesPage }) => {
+            await webTablesPage.verifyWebTablesDetails();
+        },
+    );
 
     test('should add a worker to the web table', async ({ webTablesPage }) => {
         await webTablesPage.verifyWorkerDoesNotExist(worker);
