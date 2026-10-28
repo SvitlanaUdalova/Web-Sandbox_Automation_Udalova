@@ -51,10 +51,22 @@ export class ProfilePage {
 
     async bookShouldBeInCollection(book: Book) {
         const books = await this.getBookscollection();
-        await expect(books.getByRole('link', { name: book.title })).toBeVisible();
+        await expect(books.getByRole('link', { name: book.title, exact: true })).toBeVisible();
     }
 
-     async verifyCountOfBooksInCollection(count: number) {
+    async verifyBooksInCollection(expectedBooks: readonly Book[]) {
+        await this.verifyCountOfBooksInCollection(expectedBooks.length);
+        for (const book of expectedBooks) {
+            await this.bookShouldBeInCollection(book);
+        }
+    }
+
+    async bookShouldNotBeInCollection(book: Book) {
+        const books = await this.getBookscollection();
+        await expect(books.getByRole('link', { name: book.title, exact: true })).toHaveCount(0);
+    }
+
+    async verifyCountOfBooksInCollection(count: number) {
         await this.assertBooksCount(count);
     }
 
@@ -71,6 +83,15 @@ export class ProfilePage {
             await booksCollection.locator(`#delete-record-${book.isbn}`).click();
             await this.confirmDeletion();
         }
+    }
+
+    async cancelBookDeletion(book: Book) {
+        const books = await this.getBookscollection();
+        await books.locator(`#delete-record-${book.isbn}`).click();
+        const dialog = this.page.getByRole('dialog');
+        await expect(dialog).toBeVisible();
+        await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+        await expect(dialog).toBeHidden();
     }
 
     // Clears the account's collection so every test can start and end on a known, empty state

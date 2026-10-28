@@ -62,6 +62,23 @@ traces. CI uploads both the HTML report and failure diagnostics with 30-day
 retention. These artifacts can contain account/session data; keep their access
 restricted.
 
+## Public Book Store scenario
+
+The [Book Store suite](./tests/books.spec.ts) covers BOOKS-001: open Git Pocket
+Guide from the catalog, verify its ISBN, title, author, and publisher, then return
+using **Back To Book Store** and verify the catalog URL and book link.
+It reuses the `booksPage` fixture and shared book data. Locators and UI assertions
+live in [BooksPage](./pages/books-page.ts); accessible roles and names were
+confirmed through Playwright CLI snapshots, and metadata wrapper IDs were
+confirmed through browser DOM inspection.
+
+This read-only scenario uses a fresh unauthenticated browser context. It requires
+no account credentials, API setup, or collection cleanup.
+
+```powershell
+npx playwright test tests\books.spec.ts
+```
+
 ## API-assisted profile scenarios
 
 The active [profile suite](./tests/profile.spec.ts) uses
@@ -79,6 +96,11 @@ authentication follows UI login because UI login generates the account token;
 creating the API session earlier can leave it with an invalid token. The add-book
 test still adds through the UI, and the deletion test still deletes through the
 UI; search scenarios seed books through the API rather than retesting UI addition.
+
+Profile scenarios use `ProfilePage.verifyBooksInCollection(expectedBooks)` to
+check the visible row count and every expected book's exact title together.
+Passing an empty array verifies an empty collection; the assertion does not
+depend on row order.
 
 Run the default API-assisted suite with:
 
