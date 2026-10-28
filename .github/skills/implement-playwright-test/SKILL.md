@@ -5,9 +5,13 @@ description: Implement an approved test case using this project's Playwright arc
 
 # Implement an approved Playwright test case
 
+The project root is `WEB-UI-Automation`. Run npm and Playwright commands from
+that directory and keep test code there; repository integrations remain at root.
+
 Read the approved case and inspect the current implementation before editing.
 
 Follow the existing layers:
+
 - Specs orchestrate scenarios and assert expected behavior.
 - Page objects own DOM locators and UI interactions.
 - API clients own API requests and response validation.
@@ -28,6 +32,7 @@ Never embed credentials or tokens in code.
 
 Run the new test independently, then run the relevant suite.
 Report:
+
 - Files changed and why
 - Reused or added abstractions
 - Validation commands and actual results

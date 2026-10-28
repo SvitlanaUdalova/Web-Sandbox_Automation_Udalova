@@ -1,13 +1,19 @@
 {
-  "servers": {
-    "playwright-test": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "playwright",
-        "run-test-mcp-server"
-      ]
-    }
-  },
-  "inputs": []
+    "servers": {
+        "playwright-test": {
+            "type": "stdio",
+            "command": "npm",
+            "args": [
+                "--prefix",
+                "${workspaceFolder}/WEB-UI-Automation",
+                "exec",
+                "--",
+                "playwright",
+                "run-test-mcp-server",
+                "--config",
+                "${workspaceFolder}/WEB-UI-Automation/playwright.config.ts"
+            ]
+        }
+    },
+    "inputs": []
 }
