@@ -5,6 +5,9 @@ description: Design a reviewable DemoQA test case before implementing automation
 
 # Design a test case
 
+The project root is `WEB-UI-Automation`. Read project files and run any
+inspection commands from that directory; repository integrations remain at root.
+
 Read the existing tests, page objects, fixtures, and test data relevant
 to the requested behavior.
 
@@ -15,6 +18,7 @@ If requirements are ambiguous, ask for clarification instead of inventing
 expected behavior.
 
 Produce:
+
 - Test case ID and title
 - Purpose and automation value
 - Preconditions

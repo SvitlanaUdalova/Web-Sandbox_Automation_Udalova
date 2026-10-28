@@ -1,5 +1,9 @@
 # Approved test plans and AI-assisted evidence
 
+Run terminal commands in this guide from `WEB-UI-Automation`. The configured
+MCP workspace is the repository root: pass `WEB-UI-Automation/tests/seed.spec.ts`
+as the seed and prefix plan/test output paths with `WEB-UI-Automation/`.
+
 ## BOOKS-001: Open book details and return to the catalog
 
 **Status:** Approved by the learner and automated in
@@ -51,7 +55,7 @@ It is a real readiness check, not an empty passing placeholder or another
 implementation of BOOKS-001. It belongs to `@regression`, not `@smoke`.
 
 When using the Playwright planner or generator setup tools for public Book Store
-work, select `tests/seed.spec.ts` as the seed file. Profile scenarios must instead
+work, select `WEB-UI-Automation/tests/seed.spec.ts` as the seed file. Profile scenarios must instead
 use the existing profile fixture and API client; this public seed does not log in
 or prepare an account collection.
 
@@ -128,7 +132,7 @@ and custom skills.
 
 ## Copilot environment setup
 
-The [Copilot setup workflow](../.github/workflows/copilot-setup-steps.yml)
+The [Copilot setup workflow](../../.github/workflows/copilot-setup-steps.yml)
 installs npm dependencies and Playwright browsers. No application build or local
 server is needed: the tests target an external DemoQA environment. This setup
 workflow does not run the test suites or prove that the agent tools were used.
