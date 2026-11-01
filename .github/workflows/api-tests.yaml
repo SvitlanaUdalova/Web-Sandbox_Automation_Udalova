@@ -1,0 +1,80 @@
+name: Playwright API Tests
+
+on:
+    pull_request:
+        paths:
+            - 'WEB-API-Automation/**'
+            - '.github/workflows/api-tests.yaml'
+            - '.github/skills/design-api-test-case/**'
+            - '.github/skills/implement-api-test/**'
+    push:
+        branches: [main, master, development]
+        paths:
+            - 'WEB-API-Automation/**'
+            - '.github/workflows/api-tests.yaml'
+    schedule:
+        - cron: '0 4 * * *'
+    workflow_dispatch:
+        inputs:
+            batch:
+                description: API test batch
+                type: choice
+                default: regression
+                options: [smoke, regression]
+            environment:
+                description: API environment
+                type: choice
+                default: public
+                options: [public, custom]
+
+permissions:
+    contents: read
+
+concurrency:
+    group: api-tests-${{ github.ref }}
+    cancel-in-progress: false
+
+jobs:
+    api:
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        defaults:
+            run:
+                working-directory: WEB-API-Automation
+        env:
+            CI: true
+            API_ENV: ${{ inputs.environment || 'public' }}
+            API_BASE_URL: ${{ inputs.environment == 'custom' && vars.BOOKER_BASE_URL || '' }}
+            API_USERNAME: ${{ secrets.BOOKER_USERNAME }}
+            API_PASSWORD: ${{ secrets.BOOKER_PASSWORD }}
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: npm
+                  cache-dependency-path: WEB-API-Automation/package-lock.json
+            - name: Install dependencies
+              run: npm ci
+            - name: Check types and formatting
+              run: |
+                  npm run typecheck
+                  npm run format:check
+            - name: Run API tests without browser installation
+              env:
+                  BATCH: ${{ inputs.batch || (github.event_name == 'pull_request' && 'smoke' || 'regression') }}
+              run: |
+                  case "$BATCH" in
+                    smoke|regression) npm test -- --grep "@$BATCH" ;;
+                    *) echo "::error::Unsupported batch"; exit 1 ;;
+                  esac
+            - name: Upload API reports
+              if: ${{ !cancelled() }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: api-test-reports
+                  path: |
+                      WEB-API-Automation/playwright-report/
+                      WEB-API-Automation/test-results/results.xml
+                  if-no-files-found: warn
+                  retention-days: 14

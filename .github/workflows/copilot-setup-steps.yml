@@ -31,3 +31,7 @@ jobs:
 
             - name: Install Playwright Browsers
               run: npx playwright install --with-deps
+
+            - name: Install API test dependencies
+              working-directory: WEB-API-Automation
+              run: npm ci
