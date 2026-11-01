@@ -27,10 +27,7 @@ export function getEnvironment() {
 export function getCredentials(): Credentials {
     const username = process.env.API_USERNAME;
     const password = process.env.API_PASSWORD;
-    if (
-        !username ||
-        !password 
-     ) {
+    if (!username || !password) {
         throw new Error('Set API_USERNAME and API_PASSWORD in the local .env or CI secrets.');
     }
     return { username, password };
