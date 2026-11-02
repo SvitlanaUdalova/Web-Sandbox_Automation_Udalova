@@ -46,21 +46,56 @@ unique names and owned IDs; they never delete all bookings.
 
 ## Architecture
 
-| Directory                    | Responsibility                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------ |
-| [api client](./api%20client) | HTTP transport, per-client token cookie, timeouts, response disposal, schema-aware parsing |
-| [Services](./Services)       | Auth, booking and health endpoint operations; no test assertions                           |
-| [Models](./Models)           | Request/response interfaces for authentication and bookings                                |
-| [Schema](./Schema)           | Strict runtime response contracts                                                          |
-| [test data](./test%20data)   | Factories with defaults/overrides and named data-driven cases                              |
-| [tests](./tests)             | Scenario orchestration and exact business assertions                                       |
-| [fixtures](./fixtures)       | Shared Playwright test fixtures: token acquisition, service wiring, owned-booking cleanup  |
-| [utils](./utils)             | Environment loading, JSON/text assertions                                                  |
+| Directory                    | Responsibility                                                                                                                           |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [api client](./api%20client) | HTTP transport, per-client token cookie, timeouts, response disposal, schema-aware parsing, redacted request/response report attachments |
+| [Services](./Services)       | Auth, booking and health endpoint operations; no test assertions                                                                         |
+| [Schema](./Schema)           | Strict runtime response contracts; the single source of truth for response shapes                                                        |
+| [Models](./Models)           | Types for request and response shapes used across the project                                                                            |
+| [test data](./test%20data)   | Factories with defaults/overrides and named data-driven cases                                                                            |
+| [tests](./tests)             | Scenario orchestration and exact business assertions                                                                                     |
+| [fixtures](./fixtures)       | Shared Playwright test fixtures: token acquisition, service wiring, owned-booking cleanup                                                |
+| [utils](./utils)             | Environment loading, JSON/text assertions                                                                                                |
 
 `ApiClient -> Service -> Spec` separates transport from domain operations.
 Specs do not make raw HTTP calls. `BookingService.create` records successfully
 created IDs before full contract assertions, allowing cleanup even if a later
 assertion fails. The ID itself must be returned correctly to clean it up.
+
+### Models are derived from Schema, not duplicated
+
+`Schema` is the single source of truth for every response shape. `Models`
+re-exports those same shapes as `z.infer<typeof someSchema>` types instead of
+hand-written interfaces that could drift from the Zod schema that actually
+validates responses at runtime:
+
+```typescript
+// Models/booking.ts
+export type Booking = z.infer<typeof bookingSchema>;
+export type CreatedBooking = z.infer<typeof createdBookingSchema>;
+```
+
+This only applies to **response** shapes. `Credentials` (the `POST /auth` body)
+and `BookingFilters` (the `GET /booking` query parameters) are **request**
+shapes with no response schema to derive from, so they stay as hand-written
+interfaces in `Models`; each has a short comment explaining why. `Schema` no
+longer imports from `Models` at all — the dependency now flows one way,
+`Models -> Schema`, which removed the previous `satisfies z.ZodType<...>`
+checks on the response schemas, since a type derived from a schema trivially
+satisfies it by construction.
+
+### Request/response logging attached to the report
+
+Every call made through `ApiClient.send()` attaches a JSON record of that
+request and response as a named attachment on the currently running test, via
+`test.info().attach()`. It is visible per-test in the Playwright HTML report
+(`npx playwright show-report`) without re-running anything. `Authorization`
+and `Cookie` header values are replaced with `<redacted>` before attaching,
+since `Cookie` carries the bearer token obtained from `/auth`. This project's
+Playwright trace is intentionally `off` elsewhere to avoid persisting tokens;
+these redacted attachments are the durable request/response evidence instead.
+Attachments are produced for every call, not only on failure, so a reviewer
+can inspect the full request/response sequence of a passing test as well.
 
 The test-scoped `bookings` fixture deletes only its created IDs in `finally`,
 checks deletion and confirms absence. Tests which explicitly delete an entity
@@ -316,6 +351,46 @@ Validation of this second extension:
 - `npm run test:regression`: **44 normal passes, 3 expected failures (RB-001,
   RB-002, RB-003), 0 unexpected failures** (47 checks; 59.1 seconds).
 - `npm run format`: applied, only the new test file changed.
+
+### Reviewer-requested changes: derived models and report logging
+
+A reviewer asked for two changes: derive `Models` from `Schema` where possible,
+and attach request/response logging to the test report.
+
+For the first, `Schema/booking.ts` and `Schema/auth.ts` no longer import from
+`Models`; instead `Models/booking.ts` and `Models/auth.ts` export
+`z.infer<typeof someSchema>` types for every shape that has a corresponding
+response schema (`Booking`, `BookingDates`, `CreatedBooking`, `BookingReference`,
+`AuthToken`, `AuthFailure`). `Credentials` and `BookingFilters` are request
+shapes with no response schema to derive from, so they remain hand-written,
+each with a short comment stating why. This removed the previous
+`satisfies z.ZodType<...>` checks on those schemas, since a type derived from a
+schema trivially satisfies it.
+
+For the second, `ApiClient.send()` now attaches a redacted JSON record of every
+request and response to the running test via `test.info().attach()`, visible in
+the HTML report. `Authorization` and `Cookie` values are replaced with
+`<redacted>` before attaching. This was verified by running a test with the
+JSON reporter and decoding the base64 attachment bodies directly: the `Cookie`
+header on an authenticated `DELETE` request showed `<redacted>`, while
+unauthenticated requests showed only the non-sensitive `Accept` header, and
+response bodies matched what the assertions in the test itself observed.
+
+Validation:
+
+- `npm run typecheck`: passed.
+- `npx playwright test bookings.spec.ts --grep "create and retrieve"`
+  (independent run, JSON reporter): **1 passed**; decoded attachments confirmed
+  redaction and correct request/response content for auth, create, read and
+  cleanup-delete calls.
+- `npx playwright test input-validation.spec.ts negative.spec.ts`: **13 passed**
+  (API-SCHEMA-003 as its existing expected failure), confirming logging does not
+  break requests with malformed bodies (e.g. the deliberately invalid JSON
+  string used by API-NEG-012).
+- `npm run test:regression`: **44 normal passes, 3 expected failures (RB-001,
+  RB-002, RB-003), 0 unexpected failures** (47 checks; 57.4 seconds) — identical
+  outcome to before these changes, confirming no test behavior changed.
+- `npm run format` / `npm run format:check`: passed.
 
 ### Validation and instability investigation
 
