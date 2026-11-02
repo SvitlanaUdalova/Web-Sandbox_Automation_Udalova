@@ -13,12 +13,34 @@ type RequestOptions = {
 // neither may appear in the attached request/response report.
 const SENSITIVE_HEADER_NAMES = new Set(['authorization', 'cookie']);
 
+// These field names carry credentials or tokens wherever they appear in a
+// request or response body (e.g. the /auth request body and its response).
+// Redacted regardless of nesting depth, so a future endpoint that nests one
+// of these fields is covered without further changes here.
+const SENSITIVE_BODY_FIELD_NAMES = new Set(['username', 'password', 'token']);
+
 function redactHeaders(headers: Record<string, string>): Record<string, string> {
     const redacted: Record<string, string> = {};
     for (const [name, value] of Object.entries(headers)) {
         redacted[name] = SENSITIVE_HEADER_NAMES.has(name.toLowerCase()) ? '<redacted>' : value;
     }
     return redacted;
+}
+
+function redactBody(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map(redactBody);
+    }
+    if (value !== null && typeof value === 'object') {
+        const redacted: Record<string, unknown> = {};
+        for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+            redacted[key] = SENSITIVE_BODY_FIELD_NAMES.has(key.toLowerCase())
+                ? '<redacted>'
+                : redactBody(nested);
+        }
+        return redacted;
+    }
+    return value;
 }
 
 function parseBodyForReport(text: string): unknown {
@@ -82,12 +104,12 @@ export class ApiClient {
                 url: request.path,
                 params: request.params,
                 headers: redactHeaders(request.headers),
-                body: request.body,
+                body: redactBody(request.body),
             },
             response: {
                 status: response.status,
                 headers: redactHeaders(response.headers),
-                body: parseBodyForReport(response.textBody()),
+                body: redactBody(parseBodyForReport(response.textBody())),
             },
         };
 

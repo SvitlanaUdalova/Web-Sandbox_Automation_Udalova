@@ -90,12 +90,19 @@ Every call made through `ApiClient.send()` attaches a JSON record of that
 request and response as a named attachment on the currently running test, via
 `test.info().attach()`. It is visible per-test in the Playwright HTML report
 (`npx playwright show-report`) without re-running anything. `Authorization`
-and `Cookie` header values are replaced with `<redacted>` before attaching,
-since `Cookie` carries the bearer token obtained from `/auth`. This project's
-Playwright trace is intentionally `off` elsewhere to avoid persisting tokens;
-these redacted attachments are the durable request/response evidence instead.
-Attachments are produced for every call, not only on failure, so a reviewer
-can inspect the full request/response sequence of a passing test as well.
+and `Cookie` header values are replaced with `<redacted>`, since `Cookie`
+carries the bearer token obtained from `/auth`. Request and response **bodies**
+are also redacted: any `username`, `password`, or `token` field is replaced
+with `<redacted>` regardless of nesting depth, so the `/auth` request body and
+its response are never shown in plain text, including in every negative
+authentication case. This body redaction only affects the attached report
+copy; the actual parsed response used by assertions is unaffected, verified by
+decoding real attachment bodies from a test run and confirming the full
+regression suite's outcome is unchanged. This project's Playwright trace is
+intentionally `off` elsewhere to avoid persisting tokens; these redacted
+attachments are the durable request/response evidence instead. Attachments are
+produced for every call, not only on failure, so a reviewer can inspect the
+full request/response sequence of a passing test as well.
 
 The test-scoped `bookings` fixture deletes only its created IDs in `finally`,
 checks deletion and confirms absence. Tests which explicitly delete an entity
