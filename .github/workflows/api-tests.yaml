@@ -62,7 +62,7 @@ jobs:
                   npm run format:check
             - name: Run API tests without browser installation
               env:
-                  BATCH: ${{ inputs.batch || (github.event_name == 'pull_request' && 'smoke' || 'regression') }}
+                  BATCH: ${{ inputs.batch || (github.event_name == 'push' && 'smoke' || 'regression') }}
               run: |
                   case "$BATCH" in
                     smoke|regression) npm test -- --grep "@$BATCH" ;;

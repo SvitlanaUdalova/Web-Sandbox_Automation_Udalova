@@ -442,8 +442,8 @@ fabricated CI investigation is included.
 
 [Playwright API Tests](../.github/workflows/api-tests.yaml) runs:
 
-- PRs affecting this project/workflow/skills: smoke checks.
-- Pushes affecting this project/workflow on main/master/development: regression.
+- PRs affecting this project/workflow/skills: regression (all checks).
+- Pushes affecting this project/workflow on main/master/development: smoke.
 - Nightly at 04:00 UTC: regression on the default branch.
 - Manual dispatch: smoke/regression and public/custom environment selection.
 
