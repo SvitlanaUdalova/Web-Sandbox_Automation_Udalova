@@ -101,6 +101,19 @@ the API client, clears the collection, and opens the profile before each test.
 It clears the collection again during teardown, including when a test fails. Other suites still
 use the original page fixtures without API setup.
 
+`BookCollectionApi` is layered the same way as the sibling
+[WEB-API-Automation](../WEB-API-Automation/README.md) project, applied locally
+within this project rather than as a cross-project dependency: a generic
+[ApiClient](./api/api-client.ts)/[ApiResponse](./api/api-response.ts) pair
+handles HTTP transport and schema-aware JSON parsing, and
+[book-collection-schema.ts](./api/book-collection-schema.ts) holds the Zod
+response contracts for DemoQA's login and account endpoints. These schemas are
+intentionally non-strict (`z.object`, not `z.strictObject`): DemoQA's login
+response includes additional account fields this project does not use, and
+being strict here would make the client brittle to fields it never asserts on.
+`BookCollectionApi`'s public methods (`authenticate`, `addBooks`, `clearBooks`)
+are unchanged, so the fixture and tests that consume it did not need to change.
+
 The API client checks HTTP statuses, validates the response fields it consumes,
 and verifies persisted collection state. Browser login remains through the UI:
 an API token does not automatically authenticate a browser context. API
