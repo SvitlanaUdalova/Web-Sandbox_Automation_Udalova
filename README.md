@@ -3,6 +3,11 @@
 The DemoQA Playwright project lives in
 [WEB-UI-Automation](./WEB-UI-Automation/README.md).
 
+Restful Booker API tests live in
+[WEB-API-Automation](./WEB-API-Automation/README.md). This separate Playwright
+project uses request contexts without browsers and has its own dependencies,
+configuration, and CI workflow.
+
 ## Run Web UI tests
 
 Run package-manager and Playwright commands from the project directory:

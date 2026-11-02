@@ -1,6 +1,8 @@
 export class Book {
-    constructor(public title: string, public isbn: string) {
-    }
+    constructor(
+        public title: string,
+        public isbn: string,
+    ) {}
 }
 
 export interface BookDetails extends Book {

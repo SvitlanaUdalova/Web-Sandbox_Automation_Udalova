@@ -1,0 +1,24 @@
+{
+    "name": "web-api-automation",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Playwright API contract and workflow tests for Restful Booker",
+    "scripts": {
+        "test": "playwright test",
+        "test:smoke": "playwright test --grep @smoke",
+        "test:regression": "playwright test --grep @regression",
+        "test:stability": "playwright test --grep @regression --repeat-each=3",
+        "test:contracts": "playwright test tests/schema.spec.ts",
+        "typecheck": "tsc --noEmit",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.62.1",
+        "@types/node": "^26.4.1",
+        "dotenv": "^18.0.2",
+        "prettier": "^3.6.2",
+        "typescript": "^5.9.3",
+        "zod": "^4.1.12"
+    }
+}
