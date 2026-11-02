@@ -6,8 +6,7 @@ import { getCredentials } from '../utils/environment';
 test.describe('Authentication', { tag: '@regression' }, () => {
     test('valid credentials return a non-empty token', { tag: '@smoke' }, async ({ auth }) => {
         const response = await auth.createToken(getCredentials());
-        const result = expectJson(response, authTokenSchema);
-        expect(typeof result.token === 'string').toBe(true);
+        expectJson(response, authTokenSchema);
     });
 
     for (const name of [

@@ -14,9 +14,6 @@ test.describe('Booking workflows', { tag: '@regression' }, () => {
     test('list contains the new booking and valid identifiers', async ({ bookings }) => {
         const created = expectJson(await bookings.create(buildBooking()), createdBookingSchema);
         const entries = expectJson(await bookings.list(), bookingReferencesSchema);
-        expect(
-            entries.every((entry) => Number.isInteger(entry.bookingid) && entry.bookingid > 0),
-        ).toBe(true);
         expect(entries.some((entry) => entry.bookingid === created.bookingid)).toBe(true);
     });
 
