@@ -40,7 +40,7 @@ export const test = base.extend<PageFixtures>({
     booksPage: async ({ page }, use) => {
         await page.goto(BooksPage.URL);
         await use(new BooksPage(page));
-    }
+    },
 });
 
 export { expect };

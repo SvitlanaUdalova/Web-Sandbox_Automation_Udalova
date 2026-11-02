@@ -1,5 +1,5 @@
-import { expect, Page } from "@playwright/test";
-import { Book, BookDetails } from "../models/book";
+import { expect, Page } from '@playwright/test';
+import { Book, BookDetails } from '../models/book';
 
 export class BooksPage {
     static readonly URL = '/books';
@@ -24,11 +24,21 @@ export class BooksPage {
     }
 
     async verifyBookDetails(book: BookDetails) {
-        await expect(this.page.getByRole('heading', { name: 'Book Store', exact: true })).toBeVisible();
-        await expect(this.page.locator('#ISBN-wrapper').getByText(book.isbn, { exact: true })).toBeVisible();
-        await expect(this.page.locator('#title-wrapper').getByText(book.title, { exact: true })).toBeVisible();
-        await expect(this.page.locator('#author-wrapper').getByText(book.author, { exact: true })).toBeVisible();
-        await expect(this.page.locator('#publisher-wrapper').getByText(book.publisher, { exact: true })).toBeVisible();
+        await expect(
+            this.page.getByRole('heading', { name: 'Book Store', exact: true }),
+        ).toBeVisible();
+        await expect(
+            this.page.locator('#ISBN-wrapper').getByText(book.isbn, { exact: true }),
+        ).toBeVisible();
+        await expect(
+            this.page.locator('#title-wrapper').getByText(book.title, { exact: true }),
+        ).toBeVisible();
+        await expect(
+            this.page.locator('#author-wrapper').getByText(book.author, { exact: true }),
+        ).toBeVisible();
+        await expect(
+            this.page.locator('#publisher-wrapper').getByText(book.publisher, { exact: true }),
+        ).toBeVisible();
     }
 
     async backToBookStore() {
